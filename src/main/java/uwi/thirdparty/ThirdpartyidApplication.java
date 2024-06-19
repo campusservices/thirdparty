@@ -10,9 +10,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import uwi.thirdparty.dao.OracleDao;
 import uwi.thirdparty.repository.TriggerListRepository;
 import uwi.thirdparty.service.contract.ThirdPartyService;
 import uwi.thirdparty.util.UtilityLogger;
@@ -26,6 +25,9 @@ public class ThirdpartyidApplication {
     @Autowired
     ThirdPartyService service;
 	
+    @Autowired
+    OracleDao dao;
+    
 	@Autowired
 	TriggerListRepository repo;
 	
@@ -37,21 +39,11 @@ public class ThirdpartyidApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ThirdpartyidApplication.class, args);
 	}
-
-//	@Bean
-//	public WebMvcConfigurer corsConfigurer() {
-//		return new WebMvcConfigurer() {
-//			@Override
-//			public void addCorsMappings(CorsRegistry registry) {
-//				registry.addMapping("/thirdparty/uploadFile").allowedOrigins("https://thirdparty.cavehill.uwi.edu");
-//			}
-//		};
-//	}
 	
 	@Bean
 	public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
 		return args -> {
-//			service.alterTrigger("disable");
+//          dao.openConnection();
 		};
 	}
 }

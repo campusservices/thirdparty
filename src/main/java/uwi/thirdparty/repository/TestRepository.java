@@ -7,5 +7,6 @@ import uwi.thirdparty.entity.Test;
 
 @Repository
 public interface TestRepository extends JpaRepository<Test, Long>  {
-
+   
+	
 }

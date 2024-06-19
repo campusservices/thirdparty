@@ -1,24 +1,14 @@
 package uwi.thirdparty.dao;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -32,10 +22,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import uwi.thirdparty.config.OracleConfig;
+import uwi.thirdparty.entity.DatabaseConfig;
+import uwi.thirdparty.entity.Databaseselector;
+import uwi.thirdparty.entity.DatabaseTypes;
 import uwi.thirdparty.entity.Student;
 import uwi.thirdparty.exceptions.RecordNotFoundException;
+import uwi.thirdparty.repository.DatabaseSelectorRepository;
 import uwi.thirdparty.util.NewDateFormatterImpl;
-import uwi.thirdparty.util.UtilityLogger;
 
 
 
@@ -59,7 +52,13 @@ public class OracleDao {
     
 	@Autowired
     private final OracleConfig service;
-
+    
+    @Autowired
+    private DatabaseConfig config;
+    
+    @Autowired 
+    private final DatabaseSelectorRepository selectorRepository;
+    
     @Autowired
     private NewDateFormatterImpl df;
     
@@ -72,20 +71,35 @@ public class OracleDao {
 	
 	@Value("${bulk}")
 	private String BULK_FILE_DIRECTORY;
-    
 	
-	public OracleDao(OracleConfig service) {
+	
+    
+	public OracleDao(OracleConfig service, DatabaseSelectorRepository selectorRepository) {
 		this.service = service;	
-		
+		this.selectorRepository = selectorRepository; 
 	}
 	
 	public void openConnection() throws NamingException, SQLException  {
+		
+		String dataSourceString = "";
+		
+		List<Databaseselector> list = selectorRepository.findAll();
+		Databaseselector selector = list.get(0);
+        
+        if (selector.getName().trim().equals(DatabaseTypes.PROD.toString())) {
+           dataSourceString = config.getProd();
+        } else if (selector.getName().trim().equals(DatabaseTypes.TEST.toString())) {
+        	dataSourceString = config.getTest();
+        } else if (selector.getName().trim().equals(DatabaseTypes.TRNG.toString())) {
+        	dataSourceString = config.getTrng();
+        }
+
 		Context initContext = new InitialContext();
 		Context envContext  = (Context)initContext.lookup("java:/comp/env");
-		DataSource ds = (DataSource)envContext.lookup("jdbc/myoracle");
+		DataSource ds = (DataSource)envContext.lookup(dataSourceString); 
 		conn = ds.getConnection();
 	}
-//	public Connection setupConnection() {
+//	public void openConnection() {
 //		try {
 //
 //			logger.info("Starting Oracle Db");
@@ -102,8 +116,8 @@ public class OracleDao {
 //			logger.info("Connection error - {}", ex.getMessage());
 //		}
 //		
-//		return conn;
 //	}
+	
 	public boolean studentExistInGobtPac(int pidm) {
 		boolean found = false;
 		String selectStatement = "select gobtpac_pidm from gobtpac where gobtpac_pidm = ?";
@@ -125,6 +139,31 @@ public class OracleDao {
 		return found;
 
 	}
+	
+	public int getPidmFromGorpaud(String external_user) {
+		
+		logger.info(new Date().toString() + " - external_user {} {}", external_user, "GORPAUD");
+		String selectStatement = "select gorpaud_pidm from gorpaud where gorpaud_external_user = ?";
+		int pidm = 0;
+		try {
+			PreparedStatement prepStmt = conn.prepareStatement(selectStatement);
+
+			prepStmt.setString(1, external_user);
+			
+			ResultSet rs = prepStmt.executeQuery();
+			if (rs.next()) {
+				pidm = rs.getInt("gorpaud_pidm");
+			}
+			prepStmt.close();
+			rs.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		logger.info(new Date().toString() + " - pidm {} {}", pidm, "GORPAUD");
+		return pidm;
+	}
+	
 	public int getPidmFromGobTPac(String external_user) {
 		String selectStatement = "select gobtpac_pidm from gobtpac where gobtpac_external_user = ?";
 		int pidm = 0;
@@ -227,6 +266,21 @@ public class OracleDao {
 		
 	}
 		
+	public void deleteFromGoremal(int pidm) {
+		
+		String selectStatement = "delete from goremal where goremal_pidm = ? and goremal_emal_code = 'CA'";
+		try {
+			
+			PreparedStatement prepStmt = conn.prepareStatement(selectStatement);
+			prepStmt.setInt(1, pidm);
+			logger.info(new Date().toString() + " - Delete {} from {} records", pidm, "GOREMAL CA");
+			prepStmt.executeUpdate();
+			prepStmt.close();
+		} catch (SQLException e) {
+			logger.info(new Date().toString() + "Exception deleting {} from GOREMAL - {}", pidm, e.getMessage());
+		}
+		
+	}
 	
 	public boolean deleteFromGorpaud(String external_user) {
 		

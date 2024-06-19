@@ -29,6 +29,7 @@ import uwi.thirdparty.util.ResponseStatus;
 @CrossOrigin(originPatterns = "*", allowCredentials = "true", allowedHeaders = "*")
 
 @RestController
+@RequestMapping("/api/v1")
 public class ThirdPartyController {
 
 	private final ThirdPartyService thirdPartyService;
@@ -39,7 +40,7 @@ public class ThirdPartyController {
 	}
 	
 	@RequestMapping(
-	        value = "/thirdparty/update",
+	        value = "update",
 	        method = RequestMethod.POST,
 	        produces = MediaType.APPLICATION_JSON_VALUE
 	)
@@ -58,7 +59,7 @@ public class ThirdPartyController {
 
 
 	@RequestMapping(
-	        value = "/thirdparty/mass/update",
+	        value = "mass/update",
 	        method = RequestMethod.POST,
 	        produces = MediaType.APPLICATION_JSON_VALUE
 	)
@@ -77,7 +78,7 @@ public class ThirdPartyController {
 	}
 	
 	@RequestMapping(
-	        value = "/thirdparty/mass/show/format",
+	        value = "mass/show/format",
 	        method = RequestMethod.POST,
 	        produces = MediaType.APPLICATION_JSON_VALUE
 	)
@@ -95,7 +96,7 @@ public class ThirdPartyController {
 		return new ResponseEntity<ResponseDetails<List<Student>>>( new ResponseDetails<List<Student>>(ResponseStatus.BAD_REQUEST, null,"UnSuccessful Request"),HttpStatus.BAD_REQUEST);
 	}
 	@RequestMapping(
-	        value = "/thirdparty/student/{studentId}",
+	        value = "student/{studentId}",
 	        method = RequestMethod.GET,
 	        produces = MediaType.APPLICATION_JSON_VALUE
 	)
@@ -118,7 +119,7 @@ public class ThirdPartyController {
 		return new ResponseEntity<ResponseDetails<Student>>( new ResponseDetails<Student>(ResponseStatus.BAD_REQUEST, null,errorMessage),HttpStatus.NOT_FOUND);
 	}
 	@RequestMapping(
-	        value = "/thirdparty/students/{tpid}",
+	        value = "students/{tpid}",
 	        method = RequestMethod.GET,
 	        produces = MediaType.APPLICATION_JSON_VALUE
 	)
@@ -142,7 +143,7 @@ public class ThirdPartyController {
 	}
 	
 	@RequestMapping(
-	        value = "/thirdparty/deletion/{tpid}",
+	        value = "deletion/{tpid}",
 	        method = RequestMethod.GET,
 	        produces = MediaType.APPLICATION_JSON_VALUE
 	)
@@ -153,7 +154,7 @@ public class ThirdPartyController {
 	}
 	
 	@RequestMapping(
-	        value = "/thirdparty/swap",
+	        value = "swap",
 	        method = RequestMethod.POST,
 	        produces = MediaType.APPLICATION_JSON_VALUE
 	)
@@ -171,7 +172,7 @@ public class ThirdPartyController {
 	}
 
 	@RequestMapping(
-	        value = "/thirdparty/triggers/{status}",
+	        value = "triggers/{status}",
 	        method = RequestMethod.GET,
 	        produces = MediaType.APPLICATION_JSON_VALUE
 	)
@@ -183,7 +184,7 @@ public class ThirdPartyController {
 	}
 	
 	@RequestMapping(
-	        value = "/thirdparty/display/triggers/status",
+	        value = "display/triggers/status",
 	        method = RequestMethod.GET,
 	        produces = MediaType.APPLICATION_JSON_VALUE
 	)
@@ -193,5 +194,31 @@ public class ThirdPartyController {
 		ResponseDetails<Boolean> responseDetails = new ResponseDetails<Boolean>(ResponseStatus.SUCCESS, enabled,"Status is " + Boolean.toString(enabled));
 		return new ResponseEntity<ResponseDetails<Boolean>>(responseDetails, HttpStatus.OK);
 	}
+	
+	
+	@RequestMapping(
+	        value = "update/databaseSelector/{database}",
+	        method = RequestMethod.PUT,
+	        produces = MediaType.APPLICATION_JSON_VALUE
+    )	
+    public ResponseEntity<ResponseDetails<Boolean>>  updateDatabaseSelector(@PathVariable String database) throws Exception  {
+		
+		Boolean enabled = thirdPartyService.updateDatabaseSector(database);
+		ResponseDetails<Boolean> responseDetails = new ResponseDetails<Boolean>(ResponseStatus.SUCCESS, enabled,"Status is " + Boolean.toString(enabled));
+		return new ResponseEntity<ResponseDetails<Boolean>>(responseDetails, HttpStatus.OK);
+	}
+	
+	@RequestMapping(
+	        value = "find/databaseSelector",
+	        method = RequestMethod.GET,
+	        produces = MediaType.APPLICATION_JSON_VALUE
+    )	
+    public ResponseEntity<ResponseDetails<String>>  getCurrentDatabaseFromSelector() throws Exception  {
+		
+		String database = thirdPartyService.getCurrentDatabaseFromSelector();
+		ResponseDetails<String> responseDetails = new ResponseDetails<String>(ResponseStatus.SUCCESS, database,database);
+		return new ResponseEntity<ResponseDetails<String>>(responseDetails, HttpStatus.OK);
+	}
+	
 }
 

@@ -1,6 +1,5 @@
 package uwi.thirdparty.service.contract;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -22,4 +21,6 @@ public interface ThirdPartyService {
 	public boolean alterTrigger(String status) throws Exception;
 	public boolean triggersEnabled() throws Exception;
 	public List<Student> showFileFormat() throws Exception;
+	public boolean updateDatabaseSector(String fieldname) throws Exception;
+	public String getCurrentDatabaseFromSelector() throws Exception;
 }
