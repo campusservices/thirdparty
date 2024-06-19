@@ -1,16 +1,12 @@
 package uwi.thirdparty.service;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +20,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import uwi.thirdparty.dao.OracleDao;
+import uwi.thirdparty.entity.Databaseselector;
 import uwi.thirdparty.entity.Oracletrigger;
 import uwi.thirdparty.entity.RequestObject;
 import uwi.thirdparty.entity.Student;
+import uwi.thirdparty.repository.DatabaseSelectorRepository;
 import uwi.thirdparty.repository.TestRepository;
 import uwi.thirdparty.repository.TriggerListRepository;
 import uwi.thirdparty.service.contract.ThirdPartyService;
@@ -40,6 +38,7 @@ public class ThirdpartyServiceImpl implements ThirdPartyService {
 	private final FileStorageService fileStorageService;
 	
 	private final TriggerListRepository repository;
+	private final DatabaseSelectorRepository selectorRepository;
 	private final TestRepository repo;
 	private final UtilityLogger utilLogger;
 	private boolean altered = false;
@@ -51,11 +50,13 @@ public class ThirdpartyServiceImpl implements ThirdPartyService {
 			          FileStorageService fileStorageService, 
 			                       TriggerListRepository repository, 
 			                          TestRepository repo,
+			                          DatabaseSelectorRepository selectorRepository,
 			                          UtilityLogger utilLogger) throws NamingException, SQLException {	        
 	        this.dao = dao;
 	        this.fileStorageService = fileStorageService;
 			this.repository = repository;
 			this.repo = repo;
+			this.selectorRepository = selectorRepository;
 			this.utilLogger = utilLogger;
 			
 	}
@@ -75,6 +76,7 @@ public class ThirdpartyServiceImpl implements ThirdPartyService {
 		return student;
 	}
 
+	
 	@Override
 	public Student getStudent(String stuId) throws SQLException, NamingException {
 		long startTime =  System.currentTimeMillis();
@@ -227,9 +229,33 @@ public class ThirdpartyServiceImpl implements ThirdPartyService {
 	public boolean deleteThirdParty(String tpId) throws NamingException, SQLException {
 		// TODO Auto-generated method stub
 		dao.openConnection();
-		boolean success = dao.deleteFromGorpaud(tpId);
+		int pidm = dao.getPidmFromGorpaud(tpId);
+		dao.deleteFromGoremal(pidm);
+		dao.deleteFromGorpaud(tpId);
+		
 		dao.closeConnection();
-		return success;
+		return true;
+	}
+
+
+	@Override
+	public boolean updateDatabaseSector(String databaseName) throws Exception {
+		// TODO Auto-generated method stub
+		List <Databaseselector> list = selectorRepository.findAll();
+		Databaseselector databaseSelector = list.get(0);
+		databaseSelector.setName(databaseName);
+		selectorRepository.save(databaseSelector);
+		
+		return true;
+	}
+
+
+	@Override
+	public String getCurrentDatabaseFromSelector() throws Exception {
+		// TODO Auto-generated method stub
+		List <Databaseselector> list = selectorRepository.findAll();
+		Databaseselector databaseSelector = list.get(0);
+		return databaseSelector.getName();
 	}
 
 	

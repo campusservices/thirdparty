@@ -17,19 +17,19 @@ import uwi.thirdparty.util.ResponseStatus;
 
 @CrossOrigin(originPatterns = "*", allowCredentials = "true", allowedHeaders = "*")
 @RestController
-@ RequestMapping("/thirdparty")
-public class AuthenticationController {
+@RequestMapping("/api/v1")
+public class AuthenticationADController {
    
 private final LDAPService ldapService;
 	
 	@Autowired
-	public AuthenticationController( LDAPService ldapService) {
+	public AuthenticationADController( LDAPService ldapService) {
 	    this.ldapService = ldapService;
 	}
 	
 	
 	@RequestMapping(
-	        value = "/authenticate",
+	        value = "authenticate",
 	        		 method = RequestMethod.POST,
 	        produces = MediaType.APPLICATION_JSON_VALUE
 	)

@@ -25,7 +25,7 @@ import uwi.thirdparty.util.ResponseStatus;
 
 @CrossOrigin(originPatterns = "*", allowCredentials = "true", allowedHeaders = "*")
 @RestController
-@ RequestMapping("/thirdparty")
+@RequestMapping("/api/v1")
 public class FileController {
 
 	@Autowired
@@ -34,7 +34,7 @@ public class FileController {
     private String fileName = "";
     
 	/*uploads csv files to api*/
-	@PostMapping(value = "/uploadFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(value = "uploadFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public  ResponseEntity<ResponseDetails<UploadFileResponse>> uploadFile(@RequestParam("file") MultipartFile file, 
 		 	                                                                                                     HttpServletRequest request) throws IllegalStateException, IOException {
 	    
